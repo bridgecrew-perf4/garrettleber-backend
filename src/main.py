@@ -10,7 +10,7 @@ def lambda_handler(event, context):
   table = dynamodbclient.Table(VISITORS_TABLE)
   table.update_item(
     Key={
-        'website':'imkumpy.com'
+        'website':'garrettleber.com'
     },
     UpdateExpression="ADD hits :val1",
     ExpressionAttributeValues={
@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     ReturnValues="UPDATED_NEW"
   )
 
-  response = table.get_item(Key={'website':'imkumpy.com'})
+  response = table.get_item(Key={'website':'garrettleber.com'})
   data = response['Item']['hits']
 
 
