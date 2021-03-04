@@ -4,7 +4,8 @@ from main import lambda_handler
 
 class TestLambda(unittest.TestCase):
     def test_lambda_handler(self):
-        self.assertEqual(lambda_handler("status","test")["statuscode"],200)
+        VISITORS_TABLE = "Visitors"
+        self.assertEqual(lambda_handler("status","test")["statusCode"],200)
 
 if __name__ == '__main__':
     unittest.main()

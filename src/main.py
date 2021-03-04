@@ -2,12 +2,12 @@ from decimal import Decimal
 import os
 import boto3
 
-
-VISITORS_TABLE = os.environ['VISITORS_TABLE']
+#Code used to pull variable created from terraform, but this created issues with the unit tests
+#VISITORS_TABLE = os.environ['VISITORS_TABLE']
 
 def lambda_handler(event, context):
   dynamodbclient=boto3.resource('dynamodb')
-  table = dynamodbclient.Table(VISITORS_TABLE)
+  table = dynamodbclient.Table("Visitors")
   table.update_item(
     Key={
         'website':'garrettleber.com'
