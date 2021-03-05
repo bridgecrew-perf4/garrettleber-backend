@@ -11,6 +11,8 @@
 zip src/lambda_function_payload.zip src/main.py
 zip -r package/lambda_layer_payload.zip package/python/
 
+echo test
+
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
 	against=HEAD
