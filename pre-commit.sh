@@ -7,6 +7,10 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
+# Package up lambda function and layer for tf deployment via Github Actions
+zip src/lambda_function_payload.zip src/main.py
+zip -r package/lambda_layer_payload.zip package/python/
+
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
 	against=HEAD
@@ -47,7 +51,3 @@ fi
 
 # If there are whitespace errors, print the offending file names and fail.
 exec git diff-index --check --cached $against --
-
-# Package up lambda function and layer for tf deployment via Github Actions
-zip src/lambda_function_payload.zip src/main.py
-zip -r package/lambda_layer_payload.zip package/python/
