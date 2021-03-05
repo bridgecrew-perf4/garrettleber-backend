@@ -5,6 +5,12 @@ terraform {
       version = "~> 2.70"
     }
   }
+
+  backend "s3" {
+    bucket = "garrettleber-tf-backend"
+    key    = "prod/terraform.tfstate"
+    region = "us-east-1"
+  }
 }
 
 provider "aws" {
@@ -13,8 +19,8 @@ provider "aws" {
 }
 
 resource "aws_lambda_layer_version" "visitors_app_layer" {
-  filename   = "package/lambda_layer_payload.zip"
-  layer_name = "visitors_app_layer"
+  filename         = "package/lambda_layer_payload.zip"
+  layer_name       = "visitors_app_layer"
   source_code_hash = filebase64sha256("package/lambda_layer_payload.zip")
 
   compatible_runtimes = ["python3.8"]
@@ -69,7 +75,7 @@ resource "aws_lambda_function" "visitorsapp" {
   source_code_hash = filebase64sha256("src/lambda_function_payload.zip")
 
   runtime = "python3.8"
-  layers = [aws_lambda_layer_version.visitors_app_layer.arn]
+  layers  = [aws_lambda_layer_version.visitors_app_layer.arn]
   depends_on = [
     aws_lambda_layer_version.visitors_app_layer,
     aws_dynamodb_table.visitors_app_table,
@@ -88,48 +94,48 @@ resource "aws_api_gateway_rest_api" "visitors_rest_api" {
 }
 
 resource "aws_api_gateway_resource" "visitors_app_proxy" {
-   rest_api_id = aws_api_gateway_rest_api.visitors_rest_api.id
-   parent_id   = aws_api_gateway_rest_api.visitors_rest_api.root_resource_id
-   path_part   = "getcount"
+  rest_api_id = aws_api_gateway_rest_api.visitors_rest_api.id
+  parent_id   = aws_api_gateway_rest_api.visitors_rest_api.root_resource_id
+  path_part   = "getcount"
 }
 
 resource "aws_api_gateway_method" "visitors_gateway_proxy" {
-   rest_api_id   = aws_api_gateway_rest_api.visitors_rest_api.id
-   resource_id   = aws_api_gateway_resource.visitors_app_proxy.id
-   http_method   = "ANY"
-   authorization = "NONE"
+  rest_api_id   = aws_api_gateway_rest_api.visitors_rest_api.id
+  resource_id   = aws_api_gateway_resource.visitors_app_proxy.id
+  http_method   = "ANY"
+  authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "visitors_app_lambda" {
-   rest_api_id = aws_api_gateway_rest_api.visitors_rest_api.id
-   resource_id = aws_api_gateway_method.visitors_gateway_proxy.resource_id
-   http_method = aws_api_gateway_method.visitors_gateway_proxy.http_method
+  rest_api_id = aws_api_gateway_rest_api.visitors_rest_api.id
+  resource_id = aws_api_gateway_method.visitors_gateway_proxy.resource_id
+  http_method = aws_api_gateway_method.visitors_gateway_proxy.http_method
 
-   integration_http_method = "POST"
-   type                    = "AWS_PROXY"
-   uri                     = aws_lambda_function.visitorsapp.invoke_arn
-   depends_on = [
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.visitorsapp.invoke_arn
+  depends_on = [
     aws_lambda_function.visitorsapp,
   ]
 }
 
 resource "aws_api_gateway_deployment" "visitors_app_api_gateway_deploy" {
-   depends_on = [
-     aws_api_gateway_integration.visitors_app_lambda
-   ]
+  depends_on = [
+    aws_api_gateway_integration.visitors_app_lambda
+  ]
 
-   rest_api_id = aws_api_gateway_rest_api.visitors_rest_api.id
-   stage_name  = "prod"
+  rest_api_id = aws_api_gateway_rest_api.visitors_rest_api.id
+  stage_name  = "prod"
 }
 
 resource "aws_lambda_permission" "visitors_apigw" {
-   statement_id  = "AllowAPIGatewayInvoke"
-   action        = "lambda:InvokeFunction"
-   function_name = aws_lambda_function.visitorsapp.function_name
-   principal     = "apigateway.amazonaws.com"
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.visitorsapp.function_name
+  principal     = "apigateway.amazonaws.com"
 
-   
-   source_arn = "${aws_api_gateway_rest_api.visitors_rest_api.execution_arn}/*/*"
+
+  source_arn = "${aws_api_gateway_rest_api.visitors_rest_api.execution_arn}/*/*"
 }
 
 
