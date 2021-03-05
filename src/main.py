@@ -6,7 +6,7 @@ import boto3
 #VISITORS_TABLE = os.environ['VISITORS_TABLE']
 
 def lambda_handler(event, context):
-  dynamodbclient=boto3.resource('dynamodb')
+  dynamodbclient=boto3.resource('dynamodb', region_name='us-east-1')
   table = dynamodbclient.Table("Visitors")
   table.update_item(
     Key={
