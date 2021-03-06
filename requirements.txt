@@ -1,3 +1,2 @@
-Flask
 boto3
-aws-wsgi
+pre-commit
