@@ -18,10 +18,16 @@ provider "aws" {
   region  = "us-east-1"
 }
 
+data "aws_s3_bucket_object" "visitors_app_layer_hash" {
+  bucket = "garrettleber-tf-backend"
+  key    = "prod/lambda-zips/lambda_layer_payload.zip.base64sha256"
+}
+
 resource "aws_lambda_layer_version" "visitors_app_layer" {
-  filename         = "package/lambda_layer_payload.zip"
   layer_name       = "visitors_app_layer"
-  source_code_hash = filebase64sha256("package/lambda_layer_payload.zip")
+  source_code_hash = data.aws_s3_bucket_object.visitors_app_layer_hash.body
+  s3_bucket        = "garrettleber-tf-backend"
+  s3_key           = "prod/lambda-zips/lambda_layer_payload.zip.base64sha256"
 
   compatible_runtimes = ["python3.8"]
 }
@@ -66,13 +72,20 @@ resource "aws_iam_role" "lambda_cust_role" {
 EOF
 }
 
+data "aws_s3_bucket_object" "visitorsapp_function_hash" {
+  bucket = "garrettleber-tf-backend"
+  key    = "prod/lambda-zips/lambda_function_payload.zip.base64sha256"
+}
+
 resource "aws_lambda_function" "visitorsapp" {
-  filename      = "src/lambda_function_payload.zip"
   function_name = "visitorsapp"
   role          = aws_iam_role.lambda_cust_role.arn
   handler       = "main.lambda_handler"
 
-  source_code_hash = filebase64sha256("src/lambda_function_payload.zip")
+  source_code_hash = data.aws_s3_bucket_object.visitorsapp_function_hash.body
+
+  s3_bucket = "garrettleber-tf-backend"
+  s3_key    = "prod/lambda-zips/lambda_function_payload.zip.base64sha256"
 
   runtime = "python3.8"
   layers  = [aws_lambda_layer_version.visitors_app_layer.arn]
@@ -85,6 +98,15 @@ resource "aws_lambda_function" "visitorsapp" {
     variables = {
       VISITORS_TABLE = "Visitors"
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      "source_code_hash",
+      "last_modified",
+      "qualified_arn",
+      "version"
+    ]
   }
 }
 
@@ -160,4 +182,3 @@ resource "aws_dynamodb_table" "visitors_app_table" {
 output "base_url" {
   value = aws_api_gateway_deployment.visitors_app_api_gateway_deploy.invoke_url
 }
-
