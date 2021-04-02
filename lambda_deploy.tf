@@ -102,10 +102,10 @@ resource "aws_lambda_function" "visitorsapp" {
 
   lifecycle {
     ignore_changes = [
-      "source_code_hash",
-      "last_modified",
-      "qualified_arn",
-      "version"
+      source_code_hash,
+      last_modified,
+      qualified_arn,
+      version
     ]
   }
 }

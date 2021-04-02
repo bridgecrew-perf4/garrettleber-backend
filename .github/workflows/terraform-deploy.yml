@@ -31,7 +31,7 @@ jobs:
         run: zip src/lambda_function_payload.zip src/main.py
 
       - name: Create Lambda Layer Payload
-        run: zip -r package/lambda_layer_payload.zip package/python/
+        run: cd package/ && zip -r lambda_layer_payload.zip python/ && cd ..
 
       - name: Generate Lambda Function payload hash
         run: openssl dgst -sha256 -binary src/lambda_function_payload.zip | openssl enc -base64 | tr -d "\n" > src/lambda_function_payload.zip.base64sha256
