@@ -28,7 +28,7 @@ jobs:
         run: python3 src/test_main.py
 
       - name: Create Lambda Function Payload
-        run: zip src/lambda_function_payload.zip src/main.py
+        run: cd src/ && zip lambda_function_payload.zip main.py && cd ..
 
       - name: Create Lambda Layer Payload
         run: cd package/ && zip -r lambda_layer_payload.zip python/ && cd ..
