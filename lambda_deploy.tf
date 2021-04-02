@@ -6,7 +6,7 @@ terraform {
     }
   }
 
-backend "s3" {
+  backend "s3" {
     bucket = "garrettleber-tf-backend"
     key    = "prod/terraform.tfstate"
     region = "us-east-1"
@@ -19,8 +19,8 @@ provider "aws" {
 }
 
 data "aws_s3_bucket_object" "visitors_app_layer_hash" {
-    bucket = "garrettleber-tf-backend"
-    key = "prod/lambda-zips/lambda_layer_payload.zip.base64sha256"
+  bucket = "garrettleber-tf-backend"
+  key    = "prod/lambda-zips/lambda_layer_payload.zip.base64sha256"
 }
 
 resource "aws_lambda_layer_version" "visitors_app_layer" {
@@ -73,8 +73,8 @@ EOF
 }
 
 data "aws_s3_bucket_object" "visitorsapp_function_hash" {
-    bucket = "garrettleber-tf-backend"
-    key = "prod/lambda-zips/lambda_function_payload.zip.base64sha256"
+  bucket = "garrettleber-tf-backend"
+  key    = "prod/lambda-zips/lambda_function_payload.zip.base64sha256"
 }
 
 resource "aws_lambda_function" "visitorsapp" {
@@ -84,8 +84,8 @@ resource "aws_lambda_function" "visitorsapp" {
 
   source_code_hash = data.aws_s3_bucket_object.visitorsapp_function_hash.body
 
-  s3_bucket        = "garrettleber-tf-backend"
-  s3_key           = "prod/lambda-zips/lambda_function_payload.zip.base64sha256"
+  s3_bucket = "garrettleber-tf-backend"
+  s3_key    = "prod/lambda-zips/lambda_function_payload.zip.base64sha256"
 
   runtime = "python3.8"
   layers  = [aws_lambda_layer_version.visitors_app_layer.arn]
