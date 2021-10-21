@@ -68,7 +68,7 @@ resource "aws_lambda_function" "visitorsapp" {
   role          = aws_iam_role.lambda_cust_role.arn
   handler       = "main.lambda_handler"
 
-  source_code_hash = data.aws_s3_bucket_object.visitorsapp_function_hash.body
+  source_code_hash = chomp(data.aws_s3_bucket_object.visitorsapp_function_hash.body)
 
   s3_bucket = "garrettleber-tf-backend"
   s3_key    = "prod/lambda-zips/lambda_function_payload.zip"
@@ -86,7 +86,6 @@ resource "aws_lambda_function" "visitorsapp" {
 
   lifecycle {
     ignore_changes = [
-      source_code_hash,
       last_modified,
       qualified_arn,
       version
