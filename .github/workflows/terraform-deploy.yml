@@ -34,7 +34,7 @@ jobs:
         run: aws s3 cp src/lambda_function_payload.zip s3://garrettleber-tf-backend/prod/lambda-zips/lambda_function_payload.zip
 
       - name: Generate Lambda Function payload hash
-        run: cd src/ && openssl dgst -sha256 -binary lambda_function_payload.zip | openssl enc -base64 > src/lambda_function_payload.zip.base64sha256 && cd ..
+        run: cd src/ && openssl dgst -sha256 -binary lambda_function_payload.zip | openssl enc -base64 > lambda_function_payload.zip.base64sha256 && cd ..
 
       - name: Push Lambda Function Payload hash to S3
         run: aws s3 cp --content-type text/plain src/lambda_function_payload.zip.base64sha256 s3://garrettleber-tf-backend/prod/lambda-zips/lambda_function_payload.zip.base64sha256
