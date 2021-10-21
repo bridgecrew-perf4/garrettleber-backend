@@ -18,20 +18,6 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-data "aws_s3_bucket_object" "visitors_app_layer_hash" {
-  bucket = "garrettleber-tf-backend"
-  key    = "prod/lambda-zips/lambda_layer_payload.zip.base64sha256"
-}
-
-resource "aws_lambda_layer_version" "visitors_app_layer" {
-  layer_name       = "visitors_app_layer"
-  source_code_hash = data.aws_s3_bucket_object.visitors_app_layer_hash.body
-  s3_bucket        = "garrettleber-tf-backend"
-  s3_key           = "prod/lambda-zips/lambda_layer_payload.zip"
-
-  compatible_runtimes = ["python3.8"]
-}
-
 resource "aws_iam_role_policy" "lambda_cust_policy" {
   name = "lambda_cust_policy"
   role = aws_iam_role.lambda_cust_role.id
@@ -88,9 +74,7 @@ resource "aws_lambda_function" "visitorsapp" {
   s3_key    = "prod/lambda-zips/lambda_function_payload.zip"
 
   runtime = "python3.8"
-  layers  = [aws_lambda_layer_version.visitors_app_layer.arn]
   depends_on = [
-    aws_lambda_layer_version.visitors_app_layer,
     aws_dynamodb_table.visitors_app_table,
   ]
 

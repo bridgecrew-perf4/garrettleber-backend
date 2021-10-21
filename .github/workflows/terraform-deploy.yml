@@ -30,26 +30,14 @@ jobs:
       - name: Create Lambda Function Payload
         run: cd src/ && zip lambda_function_payload.zip main.py && cd ..
 
-      - name: Create Lambda Layer Payload
-        run: cd package/ && zip -r lambda_layer_payload.zip python/ && cd ..
-
       - name: Push Lambda Function Payload to S3
         run: aws s3 cp src/lambda_function_payload.zip s3://garrettleber-tf-backend/prod/lambda-zips/lambda_function_payload.zip
-
-      - name: Push Lambda Layer Payload to S3
-        run: aws s3 cp package/lambda_layer_payload.zip s3://garrettleber-tf-backend/prod/lambda-zips/lambda_layer_payload.zip
 
       - name: Generate Lambda Function payload hash
         run: openssl dgst -sha256 -binary src/lambda_function_payload.zip | openssl enc -base64 | tr -d "\n" > src/lambda_function_payload.zip.base64sha256
 
-      - name: Generate Lambda Layer payload hash
-        run: openssl dgst -sha256 -binary package/lambda_layer_payload.zip | openssl enc -base64 | tr -d "\n" > package/lambda_layer_payload.zip.base64sha256
-
       - name: Push Lambda Function Payload hash to S3
         run: aws s3 cp --content-type text/plain src/lambda_function_payload.zip.base64sha256 s3://garrettleber-tf-backend/prod/lambda-zips/lambda_function_payload.zip.base64sha256
-
-      - name: Push Lambda Layer Payload hash to S3
-        run: aws s3 cp --content-type text/plain package/lambda_layer_payload.zip.base64sha256 s3://garrettleber-tf-backend/prod/lambda-zips/lambda_layer_payload.zip.base64sha256
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
