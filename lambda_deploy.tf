@@ -31,9 +31,7 @@ resource "aws_iam_role_policy" "lambda_cust_policy" {
           "dynamodb:PutItem",
         ],
         "Effect": "Allow",
-        "Resource": [
-          "arn:aws:dynamodb:us-east-1:327910803467:table/Visitors"
-        ]
+        "Resource": "arn:aws:dynamodb:us-east-1:327910803467:table/Visitors"
       }
     ]
   }
