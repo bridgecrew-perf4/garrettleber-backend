@@ -28,10 +28,12 @@ resource "aws_iam_role_policy" "lambda_cust_policy" {
     "Statement": [
       {
         "Action": [
-          "logs:*","s3:*","dynamodb:*","cloudwatch:**","sns:*","lambda:*"
+          "dynamodb:PutItem",
         ],
         "Effect": "Allow",
-        "Resource": "*"
+        "Resource": [
+          "arn:aws:dynamodb:us-east-1:327910803467:table/Visitors"
+        ]
       }
     ]
   }
@@ -160,8 +162,4 @@ resource "aws_dynamodb_table" "visitors_app_table" {
     Name        = "Visitors"
     Environment = "production"
   }
-}
-
-output "base_url" {
-  value = aws_api_gateway_deployment.visitors_app_api_gateway_deploy.invoke_url
 }
