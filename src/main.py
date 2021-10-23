@@ -8,7 +8,7 @@ import boto3
 def lambda_handler(event, context):
   dynamodbclient=boto3.resource('dynamodb')
   table = dynamodbclient.Table("Visitors")
-  table.update_item(
+  response = table.update_item(
     Key={
         'website':'garrettleber.com'
     },
@@ -18,10 +18,7 @@ def lambda_handler(event, context):
     },
     ReturnValues="UPDATED_NEW"
   )
-
-  response = table.get_item(Key={'website':'garrettleber.com'})
-  data = response['Item']['hits']
-
+  data = response['Attributes']['hits']
 
   return {
       "isBase64Encoded": "false",
