@@ -1,4 +1,4 @@
-name: "Terraform"
+name: Terraform
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
   pull_request:
 
 jobs:
-  lambda_function:
-    name: "Lambda Function"
+  lambda_function_test:
+    name: Lambda Function Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,6 +27,22 @@ jobs:
       - name: Lambda Function unit test
         run: python3 src/test_main.py
 
+  lambda_function_payload:
+    name: Lambda Function Payload
+    needs: lambda_function_test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Create Lambda Function Payload
         run: cd src/ && zip lambda_function_payload.zip main.py && cd ..
 
@@ -39,10 +55,10 @@ jobs:
       - name: Push Lambda Function Payload hash to S3
         run: aws s3 cp --content-type text/plain src/lambda_function_payload.zip.base64sha256 s3://garrettleber-tf-backend/prod/lambda-zips/lambda_function_payload.zip.base64sha256
 
-  terraform:
-    name: "Terraform Plan/Deploy"
-    needs: lambda_function
+  terraform_plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -67,12 +83,10 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        if: github.event_name == 'pull_request'
         run: terraform plan -no-color
         continue-on-error: true
 
       - uses: actions/github-script@0.9.0
-        if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
@@ -96,6 +110,32 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
+  terraform_deploy:
+    name: Terraform Deploy
+    needs: lambda_function_payload
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         run: terraform apply -auto-approve
