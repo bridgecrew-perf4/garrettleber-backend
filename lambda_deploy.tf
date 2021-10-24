@@ -21,15 +21,18 @@ provider "aws" {
 resource "aws_iam_role_policy" "lambda_cust_policy" {
   name = "lambda_cust_policy"
   role = aws_iam_role.lambda_cust_role.id
+  depends_on = [
+    aws_dynamodb_table.visitors_app_table
+  ]
 
   policy = <<-EOF
   {
     "Version": "2012-10-17",
     "Statement": [
       {
-        "Action": "dynamodb:*",
+        "Action": "dynamodb:UpdateItem",
         "Effect": "Allow",
-        "Resource": "arn:aws:dynamodb:us-east-1:327910803467:table/Visitors"
+        "Resource": "${aws_dynamodb_table.visitors_app_table.arn}"
       }
     ]
   }
