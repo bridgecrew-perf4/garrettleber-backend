@@ -38,21 +38,19 @@ resource "aws_iam_role_policy" "lambda_cust_policy" {
 resource "aws_iam_role" "lambda_cust_role" {
   name = "lambda_cust_role"
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
+  assume_role_policy = jsonencode({
+    Version: "2012-10-17"
+    Statement: [
+      {
+        Action: "sts:AssumeRole"
+        Effect: "Allow"
+        Sid: ""
+        Principal: {
+          "Service": "lambda.amazonaws.com"
+        }
       },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
+    ]
+  })
 }
 
 data "aws_s3_bucket_object" "visitorsapp_function_hash" {
