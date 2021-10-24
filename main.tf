@@ -26,7 +26,8 @@ resource "aws_iam_role_policy" "lambda_cust_policy" {
     Statement : [
       {
         Action : "dynamodb:UpdateItem"
-        Effect : "Allow",
+        Effect : "Allow"
+        Sid : ""
         Resource : "${aws_dynamodb_table.visitors_app_table.arn}"
       },
     ]
