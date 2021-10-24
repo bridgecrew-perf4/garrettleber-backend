@@ -14,16 +14,12 @@ terraform {
 }
 
 provider "aws" {
-  profile = "lambdadeploy"
   region  = "us-east-1"
 }
 
 resource "aws_iam_role_policy" "lambda_cust_policy" {
   name = "lambda_cust_policy"
   role = aws_iam_role.lambda_cust_role.id
-  depends_on = [
-    aws_dynamodb_table.visitors_app_table
-  ]
 
   policy = <<-EOF
   {
