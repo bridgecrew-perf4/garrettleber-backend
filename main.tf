@@ -14,46 +14,42 @@ terraform {
 }
 
 provider "aws" {
-  profile = "lambdadeploy"
-  region  = "us-east-1"
+  region = "us-east-1"
 }
 
 resource "aws_iam_role_policy" "lambda_cust_policy" {
   name = "lambda_cust_policy"
   role = aws_iam_role.lambda_cust_role.id
 
-  policy = <<-EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
+  policy = jsonencode({
+    Version : "2012-10-17"
+    Statement : [
       {
-        "Action": "dynamodb:*",
-        "Effect": "Allow",
-        "Resource": "arn:aws:dynamodb:us-east-1:327910803467:table/Visitors"
-      }
+        Action : "dynamodb:UpdateItem"
+        Effect : "Allow"
+        Sid : ""
+        Resource : "${aws_dynamodb_table.visitors_app_table.arn}"
+      },
     ]
-  }
-  EOF
+  })
 }
 
 resource "aws_iam_role" "lambda_cust_role" {
   name = "lambda_cust_role"
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
+  assume_role_policy = jsonencode({
+    Version : "2012-10-17"
+    Statement : [
+      {
+        Action : "sts:AssumeRole"
+        Effect : "Allow"
+        Sid : ""
+        Principal : {
+          "Service" : "lambda.amazonaws.com"
+        }
       },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
+    ]
+  })
 }
 
 data "aws_s3_bucket_object" "visitorsapp_function_hash" {
