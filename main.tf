@@ -17,6 +17,60 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "aws_cloudfront_distribution" "main" {
+
+  aliases = ["garrettleber.com"]
+  default_root_object = "index.html"
+  is_ipv6_enabled = true
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    compress               = false
+    default_ttl            = 0
+    max_ttl                = 0
+    min_ttl                = 0
+    smooth_streaming       = false
+    target_origin_id       = "S3-garrettleber.com"
+    trusted_signers        = []
+    viewer_protocol_policy = "redirect-to-https"
+
+    forwarded_values {
+        headers                 = []
+        query_string            = false
+        query_string_cache_keys = []
+
+        cookies {
+            forward           = "none"
+            whitelisted_names = []
+        }
+    }
+  }
+
+  enabled = true
+  origin {
+    domain_name = "garrettleber.com.s3.amazonaws.com"
+    origin_id   = "S3-garrettleber.com"
+
+    s3_origin_config {
+        origin_access_identity = "origin-access-identity/cloudfront/E1AVFV6RD571KV"
+    }
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+      locations        = []
+    }
+  }
+  
+  viewer_certificate {
+    acm_certificate_arn            = "arn:aws:acm:us-east-1:327910803467:certificate/39970793-e6ed-4259-adbf-f69b02740c73"
+    cloudfront_default_certificate = false
+    minimum_protocol_version       = "TLSv1.2_2019"
+    ssl_support_method             = "sni-only"
+  }
+}
+
 resource "aws_iam_role_policy" "lambda_cust_policy" {
   name = "lambda_cust_policy"
   role = aws_iam_role.lambda_cust_role.id
