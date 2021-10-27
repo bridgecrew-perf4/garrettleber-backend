@@ -36,3 +36,5 @@ terraform.rc
 #-------------------------------------
 #Being cautious and ignoring this lock file
 .terraform.lock.hcl
+
+src/__pycache__
