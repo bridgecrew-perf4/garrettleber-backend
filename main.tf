@@ -1,5 +1,5 @@
 locals {
-  site_domain = "garrettleber.com"
+  site_domain  = "garrettleber.com"
   s3_origin_id = "S3-garrettleber.com"
 }
 
@@ -14,17 +14,17 @@ resource "aws_s3_bucket" "website_bucket" {
 resource "aws_s3_bucket_policy" "website_bucket" {
   bucket = aws_s3_bucket.website_bucket.id
   policy = jsonencode({
-    Id        = "PolicyForCloudFrontPrivateContent"
+    Id = "PolicyForCloudFrontPrivateContent"
     Statement = [{
-      Action    = "s3:GetObject"
-      Effect    = "Allow"
+      Action = "s3:GetObject"
+      Effect = "Allow"
       Principal = {
         AWS = aws_cloudfront_origin_access_identity.main.iam_arn
       }
-      Resource  = "${aws_s3_bucket.website_bucket.arn}/*"
-      Sid       = "1"
-    },]
-    Version   = "2008-10-17"
+      Resource = "${aws_s3_bucket.website_bucket.arn}/*"
+      Sid      = "1"
+    }, ]
+    Version = "2008-10-17"
   })
 }
 
@@ -38,31 +38,31 @@ resource "aws_route53_record" "main" {
   type    = "A"
 
   alias {
-    name = aws_cloudfront_distribution.main.domain_name
-    zone_id = aws_cloudfront_distribution.main.hosted_zone_id
+    name                   = aws_cloudfront_distribution.main.domain_name
+    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
     evaluate_target_health = false
   }
 }
 
 resource "aws_cloudfront_distribution" "main" {
-  enabled = true
-  aliases = [aws_s3_bucket.website_bucket.bucket]
+  enabled             = true
+  aliases             = [aws_s3_bucket.website_bucket.bucket]
   default_root_object = "index.html"
-  is_ipv6_enabled = true
+  is_ipv6_enabled     = true
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    default_ttl = 0
-    max_ttl = 0
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    default_ttl            = 0
+    max_ttl                = 0
     target_origin_id       = local.s3_origin_id
     viewer_protocol_policy = "redirect-to-https"
     forwarded_values {
-        query_string            = false
-        cookies {
-            forward           = "none"
-            whitelisted_names = []
-        }
+      query_string = false
+      cookies {
+        forward           = "none"
+        whitelisted_names = []
+      }
     }
   }
 
@@ -71,7 +71,7 @@ resource "aws_cloudfront_distribution" "main" {
     origin_id   = local.s3_origin_id
 
     s3_origin_config {
-        origin_access_identity = aws_cloudfront_origin_access_identity.main.cloudfront_access_identity_path
+      origin_access_identity = aws_cloudfront_origin_access_identity.main.cloudfront_access_identity_path
     }
   }
 
@@ -80,11 +80,11 @@ resource "aws_cloudfront_distribution" "main" {
       restriction_type = "none"
     }
   }
-  
+
   viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate.website_certificate.arn
-    minimum_protocol_version       = "TLSv1.2_2019"
-    ssl_support_method             = "sni-only"
+    acm_certificate_arn      = aws_acm_certificate.website_certificate.arn
+    minimum_protocol_version = "TLSv1.2_2019"
+    ssl_support_method       = "sni-only"
   }
 }
 
