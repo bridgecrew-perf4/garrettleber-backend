@@ -1,6 +1,6 @@
 locals {
   site_domain  = "garrettleber.com"
-  s3_origin_id = "S3-garrettleber.com"
+  s3_origin_id = "S3-${local.site_domain}"
 }
 
 resource "aws_s3_bucket" "website_bucket" {
