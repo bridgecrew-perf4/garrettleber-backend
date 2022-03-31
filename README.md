@@ -1,5 +1,12 @@
 # garrettleber.com - Backend
 
+## DEPRECATED
+
+**See new repo using Pulumi for live backend**
+https://github.com/lebergarrett/lebergarrett.com-backend-aws
+
+### Original Description
+
 This repo holds the backend code for my personal website, created as part of the cloud resume challenge located at <https://cloudresumechallenge.dev>
 
 `main.tf` creates the S3 bucket the website is hosted in, maintains the route53 zone, and the SSL certificate (managed by ACM). The certificate and domain are attached to the S3 bucket through a CloudFront distribution.
